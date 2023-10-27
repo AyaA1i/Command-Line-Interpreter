@@ -35,8 +35,8 @@ Hello, World!
 | `echo`  | Takes 1 argument and prints it. |
 | `pwd`   | Takes no arguments and prints the current path. |
 | `cd`    | - Takes no arguments and changes the current path to the home directory.
-           - Takes 1 argument which is ".." (e.g. `cd ..`) and changes the current directory to the previous directory.
-           - Takes 1 argument which is either the full path or the relative (short) path and changes the current path to that path. |
+            - Takes 1 argument which is ".." (e.g. `cd ..`) and changes the current directory to the previous directory.
+            - Takes 1 argument which is either the full path or the relative (short) path and changes the current path to that path. |
 | `ls`    | Takes no arguments and lists the contents of the current directory sorted alphabetically. |
 | `ls -r` | Takes no arguments and lists the contents of the current directory in reverse order. |
 | `mkdir` | - Takes 1 or more arguments and creates a directory for each argument. Each argument can be a directory name (in this case, the new directory is created in the current directory) or a path (full/short) that ends with a directory name (in this case, the new directory is created in the given path). |

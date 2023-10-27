@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44b05262-33d1-4bbf-b726-d009f431e2be" name="Changes" comment="h">
-      <change beforePath="$PROJECT_DIR$/Terminal.java" beforeDir="false" afterPath="$PROJECT_DIR$/Terminal.java" afterDir="false" />
-    </list>
+    <list default="true" id="44b05262-33d1-4bbf-b726-d009f431e2be" name="Changes" comment="added mrdir , echo , mkdir commands" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,6 +19,20 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "AyaA1i"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="d3f88223-6ce9-4146-a1f6-a5a07f16c15a" />
+        <option name="url" value="https://github.com/AyaA1i/Command-Line-Interpreter.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -78,7 +90,23 @@
       <option name="project" value="LOCAL" />
       <updated>1698428091344</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="added mrdir , echo , mkdir commands">
+      <option name="closed" value="true" />
+      <created>1698440541558</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1698440541559</updated>
+    </task>
+    <task id="LOCAL-00003" summary="added mrdir , echo , mkdir commands">
+      <option name="closed" value="true" />
+      <created>1698440561287</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1698440561287</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -94,6 +122,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="h" />
-    <option name="LAST_COMMIT_MESSAGE" value="h" />
+    <MESSAGE value="added mrdir , echo , mkdir commands" />
+    <option name="LAST_COMMIT_MESSAGE" value="added mrdir , echo , mkdir commands" />
   </component>
 </project>

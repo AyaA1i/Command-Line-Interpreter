@@ -1,6 +1,4 @@
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import java.util.Scanner;
 
 /**
  * Terminal - Executes some basic commands.
@@ -19,7 +17,78 @@ public class Terminal {
 		parser = new Parser();
 		currentDirectory = Path.of(System.getProperty("user.dir"));
 	}
+    /**
+     * 0 - standard output
+     * 1 - file (write)
+     * 2 - file (append)
+     */
+    public static int write_mode = 0;
+    /**
+     * 0 - success
+     */
+    public static int last_status = 0;
 
+    /**
+     * This method will choose the suitable command method to be called.
+     */
+    public static void chooseCommandAction(){
+        String s = "";
+        s = parser.getCommandName();
+        String[] args = parser.getArgs();
+        if (s.equals("echo")){
+            //last_status = echo(args);
+        }
+        else if (s.equals("pwd")){
+            //last_status = pwd(args);
+        }
+        else if (s.equals("cd")){
+            //last_status = cd(args);
+        }
+        else if (s.equals("ls")){
+            //last_status = ls(args);
+        }
+        else if (s.equals("mkdir")){
+            //last_status = mkdir(args);
+        }
+        else if (s.equals("rmdir")){
+            //last_status = rmdir(args);
+        }
+        else if (s.equals("touch")){
+            //last_status = touch(args);
+        }
+        else if (s.equals("cp")){
+            //last_status = cp(args);
+        }
+        else if (s.equals("rm")){
+            //last_status = rm(args);
+        }
+        else if (s.equals("cat")){
+            //last_status = cat(args);
+        }
+        else if (s.equals("wc")){
+            //last_status = wc(args);
+        }
+        else if (s.equals("history")){
+            //last_status = history(args);
+        }
+        else{
+            //last_status = 1; // command not found
+        }
+    }
+
+    public static void check_mode() {
+        for (String s : parser.getArgs()) {
+            if (s.equals(">")) {
+                write_mode = 1;
+                break;
+            }
+            if (s.equals(">>")) {
+                write_mode = 2;
+                break;
+            }
+        }
+        write_mode = 0;
+    }
 	/**
 	 * echo command Takes an argument and prints it
 	 */
@@ -89,7 +158,7 @@ public class Terminal {
 	public static void main(String[] args) throws Exception{
 		String cmd = "";
 		Scanner input = new Scanner(System.in);
-		Terminal t = new Terminal();
+
 		while (!cmd.equals("exit"))
 		{
 			System.out.print("> ");
@@ -100,11 +169,12 @@ public class Terminal {
 				break;
 			}
 			parser.parse(cmd);
-			System.out.println(parser.getCommandName());
-			for(String i : parser.args)
-				System.out.println(i);
-
+			check_mode();
+			chooseCommandAction();
+			if (last_status != 0) {
+				System.out.println("Error Occured");
+				break;
+			}
 		}
-		t.rmdir();
 	}
 }

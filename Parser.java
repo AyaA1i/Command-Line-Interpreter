@@ -17,13 +17,14 @@ class Parser {
 		String[] arr  = input.split(" ");
 		args = new String[arr.length-1];
 		for(int i = 1 ; i < arr.length ; i++)
-			args[i-1] = arr[i];
+			if(!arr[i].isEmpty())
+				args[i-1] = arr[i];
 		commandName = arr[0];
 		return false;
 	}
 
 	/**
-	 * 
+	 *
 	 * Returns the command name
 	 *
 	 * @return command name.

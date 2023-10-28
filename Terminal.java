@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.NoSuchFileException;
@@ -121,6 +122,9 @@ public class Terminal {
 
 	/**
 	 * Takes 2 arguments, both are files and copies the first onto the second.
+	 * if -r option specified: Takes 2 arguments, both are directories (empty or
+	 * not) and copies the first directory (with all its content) into the second
+	 * one.
 	 * 
 	 * @author Adham Allam
 	 * @param args argument list (files names)
@@ -129,9 +133,18 @@ public class Terminal {
 	 * @throws IOException
 	 */
 	public static int cp(String[] args) throws IOException {
-		if (args.length != 2) {
+		if (args.length > 3 || args.length < 2) {
 			System.out.println("Usage: cp file1 file2");
 			return (98);
+		}
+
+		if (args.length == 3 || args[0].equals("-r")) {
+			try {
+				copyDirectory(Paths.get(args[1]), Paths.get(args[2]));
+			} catch (IOException e) {
+				System.err.println("Error copying directory: " + e.getMessage());
+			}
+			return (0);
 		}
 
 		Path source = Paths.get(args[0]);
@@ -142,6 +155,33 @@ public class Terminal {
 			System.err.println("Error source file: " + e.getMessage());
 		}
 		return (0);
+	}
+
+	/**
+	 * Takes 2 arguments, both are directories (empty or not) and copies the first
+	 * directory (with all its content) into the second one.
+	 * 
+	 * @author Adham Allam
+	 * @param source source directory
+	 * @param target target directory
+	 * @throws IOException
+	 */
+	public static void copyDirectory(Path source, Path target) throws IOException {
+		if (!Files.exists(target)) {
+			Files.createDirectories(target);
+		}
+
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(source)) {
+			for (Path entry : stream) {
+				Path targetEntry = target.resolve(entry.getFileName());
+
+				if (Files.isDirectory(entry)) {
+					copyDirectory(entry, targetEntry);
+				} else {
+					Files.copy(entry, targetEntry, StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+		}
 	}
 
 	/**

@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.NoSuchFileException;
+
 /**
  * Terminal - Executes some basic commands.
  *
@@ -39,7 +40,7 @@ public class Terminal {
 	/**
 	 * This method will choose the suitable command method to be called.
 	 */
-	public static void chooseCommandAction() throws IOException{
+	public static void chooseCommandAction() throws IOException {
 		String s = "";
 		s = parser.getCommandName();
 		String[] args = parser.getArgs();
@@ -129,7 +130,7 @@ public class Terminal {
 	 */
 	public static int cp(String[] args) throws IOException {
 		if (args.length != 2) {
-			System.out.println("Usage: touch file1 file2");
+			System.out.println("Usage: cp file1 file2");
 			return (98);
 		}
 
@@ -137,7 +138,7 @@ public class Terminal {
 		Path target = Paths.get(args[1]);
 		try {
 			Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-		} catch(NoSuchFileException e) {
+		} catch (NoSuchFileException e) {
 			System.err.println("Error source file: " + e.getMessage());
 		}
 		return (0);
@@ -225,13 +226,12 @@ public class Terminal {
 					System.out.println("Bye :)");
 					break;
 				}
-				parser.parse(cmd);
-				check_mode();
-				chooseCommandAction();
-				if (last_status != 0) {
-					System.out.println("Error Occured");
+				if (!parser.parse(cmd)) {
+					System.err.println("Error parsing command line.");
 					break;
 				}
+				check_mode();
+				chooseCommandAction();
 			}
 		}
 	}

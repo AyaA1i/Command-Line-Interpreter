@@ -3,8 +3,9 @@
  * into command name and argument list.
  */
 class Parser {
-	String commandName;
-	String[] args;
+	private String commandName;
+	private String[] args;
+	private String cmd_line;
 
 	/**
 	 * Parses the user's input into cmd_name and arg_list.
@@ -12,24 +13,23 @@ class Parser {
 	 * @param input line to be parsed.
 	 * @return True if success, False otherwise.
 	 */
-	public boolean parse(String input)
-	{
-		String[] arr  = input.split(" ");
-		args = new String[arr.length-1];
-		for(int i = 1 ; i < arr.length ; i++)
-			if(!arr[i].isEmpty())
-				args[i-1] = arr[i];
+	public boolean parse(String input) {
+		cmd_line = input;
+		String[] arr = input.split(" ");
+		args = new String[arr.length - 1];
+		for (int i = 1; i < arr.length; i++)
+			if (!arr[i].isEmpty())
+				args[i - 1] = arr[i];
 		commandName = arr[0];
-		return false;
+		return true;
 	}
 
 	/**
-	 *
 	 * Returns the command name
 	 *
 	 * @return command name.
 	 */
-	public String getCommandName(){
+	public String getCommandName() {
 		return commandName;
 	}
 
@@ -38,7 +38,7 @@ class Parser {
 	 *
 	 * @return arg list.
 	 */
-	public String[] getArgs(){
+	public String[] getArgs() {
 		return args;
 	}
 }

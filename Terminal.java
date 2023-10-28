@@ -191,14 +191,19 @@ public class Terminal {
 	 */
 	public static int mkdir(String[] args) {
 		for (String element : args) {
-			Path newdir = currentDirectory.resolve(element);
-			try {
-				Files.createDirectories(newdir);
-				System.out.println("dir created: " + newdir);
-			} catch (FileAlreadyExistsException e) {
-				System.out.println("dir already exists: " + newdir);
-			} catch (IOException e) {
-				System.err.println("Error creating directory: " + e.getMessage());
+			try{
+				Path newdir = currentDirectory.resolve(element);
+				try {
+					Files.createDirectories(newdir);
+					System.out.println("dir created: " + newdir);
+				} catch (FileAlreadyExistsException e) {
+					System.out.println("dir already exists: " + newdir);
+				} catch (IOException e) {
+					System.err.println("Error creating directory: " + e.getMessage());
+					return (99);
+				}
+			}catch(InvalidPathException e){
+				System.err.println("Invalid Path" + e.getMessage());
 				return (99);
 			}
 		}
@@ -219,8 +224,14 @@ public class Terminal {
 			removeEmptyDirectories(currentDirectory.toFile());
 		} else {
 			for (String element : args) {
-				Path dirToRemove = currentDirectory.resolve(element);
-				removeEmptyDirectories(dirToRemove.toFile());
+				try {
+					Path dirToRemove = currentDirectory.resolve(element);
+					removeEmptyDirectories(dirToRemove.toFile());
+				}
+				catch(InvalidPathException e){
+					System.err.println("Invalid Path" + e.getMessage());
+					return (99);
+				}
 			}
 		}
 		return (0);

@@ -1,12 +1,6 @@
 import java.util.Scanner;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.NoSuchFileException;
+import java.io.*;
+import java.nio.file.*;
 
 /**
  * Terminal - Executes some basic commands.
@@ -20,12 +14,8 @@ import java.nio.file.NoSuchFileException;
  **/
 public class Terminal {
 	public static Parser parser = new Parser();
-	Path currentDirectory;
+	static Path currentDirectory = Path.of(System.getProperty("user.dir"));
 
-	public Terminal() {
-		parser = new Parser();
-		currentDirectory = Path.of(System.getProperty("user.dir"));
-	}
 
 	/**
 	 * 0 - standard output
@@ -46,7 +36,7 @@ public class Terminal {
 		s = parser.getCommandName();
 		String[] args = parser.getArgs();
 		if (s.equals("echo")) {
-			// last_status = echo(args);
+			last_status = echo(args);
 		} else if (s.equals("pwd")) {
 			// last_status = pwd(args);
 		} else if (s.equals("cd")) {
@@ -54,9 +44,9 @@ public class Terminal {
 		} else if (s.equals("ls")) {
 			// last_status = ls(args);
 		} else if (s.equals("mkdir")) {
-			// last_status = mkdir(args);
+			last_status = mkdir(args);
 		} else if (s.equals("rmdir")) {
-			// last_status = rmdir(args);
+			last_status = rmdir(args);
 		} else if (s.equals("touch")) {
 			last_status = touch(args);
 		} else if (s.equals("cp")) {
@@ -90,7 +80,7 @@ public class Terminal {
 
 	/**
 	 * Creates new and empty file
-	 * 
+	 *
 	 * @param args files names
 	 * @author Adham Allam
 	 * @return int indicates the exit status (
@@ -125,7 +115,7 @@ public class Terminal {
 	 * if -r option specified: Takes 2 arguments, both are directories (empty or
 	 * not) and copies the first directory (with all its content) into the second
 	 * one.
-	 * 
+	 *
 	 * @author Adham Allam
 	 * @param args argument list (files names)
 	 * @return int indicates the exit status (
@@ -160,7 +150,7 @@ public class Terminal {
 	/**
 	 * Takes 2 arguments, both are directories (empty or not) and copies the first
 	 * directory (with all its content) into the second one.
-	 * 
+	 *
 	 * @author Adham Allam
 	 * @param source source directory
 	 * @param target target directory
@@ -187,25 +177,33 @@ public class Terminal {
 	/**
 	 * echo command Takes an argument and prints it
 	 */
-	public void echo() {
-		for (String element : parser.getArgs()) {
+	public static int echo(String[] args) {
+		for (String element : args) {
 			System.out.println(element);
 		}
+		return (0);
 	}
 
 	/**
 	 * mkdir command
 	 * Takes 1 or more arguments and creates a directory for each argument
-	 * 
-	 * @throws IOException if an error occurs while starting navigating through dirs
+	 *
 	 */
-	public void mkdir() throws IOException {
-		for (String element : parser.getArgs()) {
+	public static int mkdir(String[] args) {
+		for (String element : args) {
 			Path newdir = currentDirectory.resolve(element);
-			Files.createDirectory(newdir);
+			try {
+				Files.createDirectories(newdir);
+				System.out.println("dir created: " + newdir);
+			} catch (FileAlreadyExistsException e) {
+				System.out.println("dir already exists: " + newdir);
+			} catch (IOException e) {
+				System.err.println("Error creating directory: " + e.getMessage());
+				return (99);
+			}
 		}
+		return (0);
 	}
-
 	/**
 	 * rmdir command
 	 * takes 1 argument which is “*” (e.g. rmdir *) and removes all the empty
@@ -214,27 +212,27 @@ public class Terminal {
 	 * takes 1 argument which is either the full path or the
 	 * relative (short) path and removes the given directory only if
 	 * it is empty.
-	 * 
-	 * @throws IOException if an error occurs while starting navigating through dirs
+	 *
 	 */
-	public void rmdir() throws IOException {
-		if (parser.getArgs()[0].equals("*")) {
+	public static int rmdir(String[] args){
+		if (args[0].equals("*")) {
 			removeEmptyDirectories(currentDirectory.toFile());
 		} else {
-			for (String element : parser.getArgs()) {
+			for (String element : args) {
 				Path dirToRemove = currentDirectory.resolve(element);
 				removeEmptyDirectories(dirToRemove.toFile());
 			}
 		}
+		return (0);
 	}
 
 	/**
 	 * recursive function to navigate through the dir.
-	 * 
+	 *
 	 * @param dir File object
 	 * @throws IOException if an error occurs while starting navigating through dirs
 	 */
-	private void removeEmptyDirectories(File dir) throws IOException {
+	private static int removeEmptyDirectories(File dir){
 		File[] files = dir.listFiles();
 		if (files != null) {
 			for (File file : files) {
@@ -244,15 +242,22 @@ public class Terminal {
 			}
 		}
 		if (dir.listFiles() == null || dir.listFiles().length == 0) {
-			Files.delete(dir.toPath());
+			try{
+				Files.delete(dir.toPath());
+			} catch (IOException e) {
+				System.err.println("Error deleting directory: " + e.getMessage());
+				return (99);
+			}
+
 		}
+		return 0;
 	}
 
 	/**
 	 * main - Entry point
 	 * Creates a new parser object and allow the user to enter
 	 * the input through the keyboard, untill he writes 'exit'.
-	 * 
+	 *
 	 * @param args an array of String arguments passed to the program
 	 * @throws Exception if an error occurs while starting the store
 	 */

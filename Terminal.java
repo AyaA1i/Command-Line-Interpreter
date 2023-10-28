@@ -58,7 +58,7 @@ public class Terminal {
 		} else if (s.equals("touch")) {
 			last_status = touch(args);
 		} else if (s.equals("cp")) {
-			// last_status = cp(args);
+			last_status = cp(args);
 		} else if (s.equals("rm")) {
 			// last_status = rm(args);
 		} else if (s.equals("cat")) {
@@ -114,6 +114,31 @@ public class Terminal {
 				System.err.println("Error creating file: " + e.getMessage());
 				return (99);
 			}
+		}
+		return (0);
+	}
+
+	/**
+	 * Takes 2 arguments, both are files and copies the first onto the second.
+	 * 
+	 * @author Adham Allam
+	 * @param args argument list (files names)
+	 * @return int indicates the exit status (
+	 *         0 - success, error otherwise).
+	 * @throws IOException
+	 */
+	public static int cp(String[] args) throws IOException {
+		if (args.length != 2) {
+			System.out.println("Usage: touch file1 file2");
+			return (98);
+		}
+
+		Path source = Paths.get(args[0]);
+		Path target = Paths.get(args[1]);
+		try {
+			Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+		} catch(NoSuchFileException e) {
+			System.err.println("Error source file: " + e.getMessage());
 		}
 		return (0);
 	}

@@ -16,7 +16,6 @@ public class Terminal {
 	public static Parser parser = new Parser();
 	static Path currentDirectory = Path.of(System.getProperty("user.dir"));
 
-
 	/**
 	 * 0 - standard output
 	 * 1 - file (write)
@@ -124,17 +123,23 @@ public class Terminal {
 	 */
 	public static int cp(String[] args) throws IOException {
 		if (args.length > 3 || args.length < 2) {
-			System.out.println("Usage: cp file1 file2");
+			System.err.println("Usage: cp file1 file2");
 			return (98);
 		}
 
-		if (args.length == 3 || args[0].equals("-r")) {
-			try {
-				copyDirectory(Paths.get(args[1]), Paths.get(args[2]));
-			} catch (IOException e) {
-				System.err.println("Error copying directory: " + e.getMessage());
+		if (args.length == 3) {
+			if (args[0].equals("-r")) {
+				try {
+					copyDirectory(Paths.get(args[1]), Paths.get(args[2]));
+				} catch (IOException e) {
+					System.err.println("Error copying directory: " + e.getMessage());
+					return (99);
+				}
+				return (0);
+			} else {
+				System.err.println("Usage: cp -r dir1 dir2");
+				return (100);
 			}
-			return (0);
 		}
 
 		Path source = Paths.get(args[0]);
@@ -143,6 +148,7 @@ public class Terminal {
 			Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 		} catch (NoSuchFileException e) {
 			System.err.println("Error source file: " + e.getMessage());
+			return (101);
 		}
 		return (0);
 	}
@@ -191,7 +197,7 @@ public class Terminal {
 	 */
 	public static int mkdir(String[] args) {
 		for (String element : args) {
-			try{
+			try {
 				Path newdir = currentDirectory.resolve(element);
 				try {
 					Files.createDirectories(newdir);
@@ -202,13 +208,14 @@ public class Terminal {
 					System.err.println("Error creating directory: " + e.getMessage());
 					return (99);
 				}
-			}catch(InvalidPathException e){
+			} catch (InvalidPathException e) {
 				System.err.println("Invalid Path" + e.getMessage());
 				return (99);
 			}
 		}
 		return (0);
 	}
+
 	/**
 	 * rmdir command
 	 * takes 1 argument which is “*” (e.g. rmdir *) and removes all the empty
@@ -219,7 +226,7 @@ public class Terminal {
 	 * it is empty.
 	 *
 	 */
-	public static int rmdir(String[] args){
+	public static int rmdir(String[] args) {
 		if (args[0].equals("*")) {
 			removeEmptyDirectories(currentDirectory.toFile());
 		} else {
@@ -227,8 +234,7 @@ public class Terminal {
 				try {
 					Path dirToRemove = currentDirectory.resolve(element);
 					removeEmptyDirectories(dirToRemove.toFile());
-				}
-				catch(InvalidPathException e){
+				} catch (InvalidPathException e) {
 					System.err.println("Invalid Path" + e.getMessage());
 					return (99);
 				}
@@ -243,7 +249,7 @@ public class Terminal {
 	 * @param dir File object
 	 * @throws IOException if an error occurs while starting navigating through dirs
 	 */
-	private static int removeEmptyDirectories(File dir){
+	private static int removeEmptyDirectories(File dir) {
 		File[] files = dir.listFiles();
 		if (files != null) {
 			for (File file : files) {
@@ -253,7 +259,7 @@ public class Terminal {
 			}
 		}
 		if (dir.listFiles() == null || dir.listFiles().length == 0) {
-			try{
+			try {
 				Files.delete(dir.toPath());
 			} catch (IOException e) {
 				System.err.println("Error deleting directory: " + e.getMessage());

@@ -15,14 +15,23 @@ class Parser {
      */
     public boolean parse(String input) {
         cmd_line = input;
-        String[] arr = input.split(" ");
-        args = new String[arr.length - 1];
-        for (int i = 1; i < arr.length; i++)
-            if (!arr[i].isEmpty())
-                args[i - 1] = arr[i];
-        commandName = arr[0];
+        if (input.contains("\"")) {
+            String[] arr = input.split("\"");
+            args = new String[1];
+            args[0] = arr[1];
+            commandName = arr[0].trim();
+
+        } else {
+            String[] arr = input.split(" ");
+            args = new String[arr.length - 1];
+            for (int i = 1; i < arr.length; i++)
+                if (!arr[i].isEmpty())
+                    args[i - 1] = arr[i];
+            commandName = arr[0];
+        }
         return true;
     }
+
 
     /**
      * Returns the command name

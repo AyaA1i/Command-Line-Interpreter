@@ -65,9 +65,13 @@ public class Terminal {
         } else if (s.equals("history")) {
             last_status = history();
         } else {
-            last_status = 1; // command not found
+            if(!s.equals("")){// check if a string is not equal to the "Enter" key
+                System.err.println(s +" is not recognized as a command");
+                last_status = 1; }// command not found
         }
+
     }
+
 
     public static void check_mode() {
         for (String s : parser.getArgs()) {
@@ -308,7 +312,10 @@ public class Terminal {
      */
     public static int  pwd()
     {
-        System.out.println( currentDirectory );
+//        System.out.println( currentDirectory );
+//        return 0;
+        Path currentDir = Paths.get(System.getProperty("user.dir"));
+        System.out.println(currentDir);
         return 0;
     }
 
@@ -355,11 +362,10 @@ public class Terminal {
      * @throws IOException
      */
     public static int cat(String[] args) throws IOException {
-        if (args.length == 0 ) {
-            System.out.println("Usage: cat file1 file2");
-            return 1;
+        if (args.length > 2 || args.length < 1) {
+            System.out.println("Usage: cp file1 file2");
+            return (98);
         }
-
         for (String fileName : args) {
             try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
                 String line;
@@ -417,7 +423,7 @@ public class Terminal {
      * @return 0 if the directory was successfully changed, 1 if an error occurred.
      */
     public static int cd(String[] args) {
-        // Get the current directory path
+
         Path currentDir = Paths.get(System.getProperty("user.dir"));
 
         // Case 1: cd takes no arguments and changes the current path to the path of your home directory.
@@ -433,7 +439,7 @@ public class Terminal {
             }
         }
 
-        // Case 2: cd takes 1 argument which is ".." and changes the current directory to the previous directory.
+        // Case 2: cd takes 1 argument which is ". ." and changes the current directory to the previous directory.
         if (args.length == 1 && args[0].equals("..")) {
             try {
                 Path parentDir = currentDir.getParent();
@@ -470,6 +476,7 @@ public class Terminal {
             }
         }
 
+        // If none of the cases match, return an error.
         System.err.println("Invalid cd command. Usage: 'cd', 'cd ..', or 'cd <directory>'");
         return 1;
     }
@@ -494,6 +501,7 @@ public class Terminal {
                     System.out.println("Bye :)");
                     break;
                 }
+
                 if (!parser.parse(cmd)) {
                     System.err.println("Error parsing command line.");
                     break;

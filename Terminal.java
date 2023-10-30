@@ -17,7 +17,7 @@ import java.util.Collections;
 public class Terminal {
     public static Parser parser = new Parser();
     static Path currentDirectory = Path.of(System.getProperty("user.dir"));
-   public static Vector<String> CommandHistory = new Vector<>();
+    public static Vector<String> CommandHistory = new Vector<>();
 
     /**
      * 0 - standard output
@@ -40,11 +40,11 @@ public class Terminal {
         if (s.equals("echo")) {
             last_status = echo(args);
         } else if (s.equals("pwd")) {
-             last_status = pwd();
+            last_status = pwd();
         } else if (s.equals("cd")) {
-            // last_status = cd(args);
+            last_status = cd(args);
         } else if (s.equals("ls")) {
-             last_status = ls();
+            last_status = ls();
         }else if (s.equals("ls -r")) {
             last_status = lsr();
         }
@@ -57,15 +57,15 @@ public class Terminal {
         } else if (s.equals("cp")) {
             last_status = cp(args);
         } else if (s.equals("rm")) {
-             last_status = rm(args);
+            last_status = rm(args);
         } else if (s.equals("cat")) {
-            // last_status = cat(args);
+            last_status = cat(args);
         } else if (s.equals("wc")) {
-            // last_status = wc(args);
+            last_status = wc(args);
         } else if (s.equals("history")) {
-             last_status = history();
+            last_status = history();
         } else {
-            // last_status = 1; // command not found
+            last_status = 1; // command not found
         }
     }
 
@@ -347,6 +347,133 @@ public class Terminal {
             System.out.println(fileName + " does not exist in the current directory.");
         return 0;
     }
+    /**
+     * Displays the content of one or more files or concatenates the content of two files.
+     *
+     * @param args An array of one or two file names to display or concatenate.
+     * @return Returns 0 upon successful execution, error otherwise.
+     * @throws IOException
+     */
+    public static int cat(String[] args) throws IOException {
+        if (args.length == 0 ) {
+            System.out.println("Usage: cat file1 file2");
+            return 1;
+        }
+
+        for (String fileName : args) {
+            try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (IOException e) {
+                System.err.println("Error reading file: " + e.getMessage());
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Displays the line count, word count, and character count of a given file.
+     *
+     * @param args An array containing a single file name.
+     * @return Returns 0 on success, or a non-zero value to indicate an error.
+     * @throws IOException if an error occurs while reading the file or if the number of arguments is incorrect.
+     */
+    public static int wc(String[] args) throws IOException {
+        if (args.length != 1) {
+            throw new IllegalArgumentException("Usage: wc <file>");
+        }
+
+        String fileName = args[0];
+        int lineCount = 0;
+        int wordCount = 0;
+        int charCount = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lineCount++;
+                charCount += line.length();
+                String[] words = line.split("\\s+"); // Split by whitespace
+                wordCount += words.length;
+            }
+        } catch (IOException e) {
+            throw new IOException("Error reading file: " + e.getMessage());
+        }
+
+        System.out.println(String.format("%d %d %d %s", lineCount, wordCount, charCount, fileName));
+
+
+        return 0;
+    }
+
+//
+    /**
+     * Changes the current directory.
+     *
+     * @param args The arguments for the cd command.
+     * @return 0 if the directory was successfully changed, 1 if an error occurred.
+     */
+    public static int cd(String[] args) {
+        // Get the current directory path
+        Path currentDir = Paths.get(System.getProperty("user.dir"));
+
+        // Case 1: cd takes no arguments and changes the current path to the path of your home directory.
+        if (args.length == 0) {
+            String homeDir = System.getProperty("user.home");
+            try {
+                System.setProperty("user.dir", homeDir);
+                System.out.println(homeDir);
+                return 0;
+            } catch (Exception e) {
+                System.err.println("Error changing directory: " + e.getMessage());
+                return 1;
+            }
+        }
+
+        // Case 2: cd takes 1 argument which is ".." and changes the current directory to the previous directory.
+        if (args.length == 1 && args[0].equals("..")) {
+            try {
+                Path parentDir = currentDir.getParent();
+                if (parentDir != null) {
+                    System.setProperty("user.dir", parentDir.toString());
+                    System.out.println(parentDir);
+                    return 0;
+                } else {
+                    System.err.println("Already at the root directory.");
+                    return 1;
+                }
+            } catch (Exception e) {
+                System.err.println("Error changing directory: " + e.getMessage());
+                return 1;
+            }
+        }
+
+        // Case 3: cd takes 1 argument which is either the full path or the relative (short) path and changes the current path to that path.
+        if (args.length == 1) {
+            Path newDir = currentDir.resolve(args[0]);
+            if (Files.exists(newDir) && Files.isDirectory(newDir)) {
+                try {
+                    System.setProperty("user.dir", newDir.toString());
+                    System.out.println(newDir);
+                    return 0;
+
+                } catch (Exception e) {
+                    System.err.println("Error changing directory: " + e.getMessage());
+                    return 1;
+                }
+            } else {
+                System.err.println("Directory does not exist: " + args[0]);
+                return 1;
+            }
+        }
+
+        System.err.println("Invalid cd command. Usage: 'cd', 'cd ..', or 'cd <directory>'");
+        return 1;
+    }
+
 
     /**
      * main - Entry point

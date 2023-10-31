@@ -99,7 +99,7 @@ public class Terminal {
      */
     public static int touch(String[] args) {
         if (args.length == 0) {
-            System.out.println("Usage: touch file1 file2 ...");
+            _print("Usage: touch file1 file2 ...");
             return (98);
         }
 
@@ -109,12 +109,12 @@ public class Terminal {
                 File file = new File(currentDirectory.toFile(), fileName);
 
                 if (file.createNewFile()) {
-                    System.out.println("File created: " + file.getName());
+                    _print("File created: " + file.getName());
                 } else {
-                    System.out.println("File already exists: " + file.getName());
+                    _print("File already exists: " + file.getName());
                 }
             } catch (IOException e) {
-                System.err.println("Error creating file: " + e.getMessage());
+                _print("Error creating file: " + e.getMessage());
                 return (99);
             }
         }
@@ -135,25 +135,28 @@ public class Terminal {
      */
     public static int cp(String[] args) throws IOException {
         if (args.length < 2) {
-            System.out.println("Usage: cp file1 file2");
+            _print("Usage: cp file1 file2");
             return (98);
         }
 
-        if (args.length == 3 || args[0].equals("-r")) {
+        Path source, target;
+        if (args.length == 3 && args[0].equals("-r")) {
             try {
-                copyDirectory(Paths.get(args[1]), Paths.get(args[2]));
+                source = currentDirectory.resolve(args[1]);
+                target = currentDirectory.resolve(args[2]);
+                copyDirectory(source, target);
             } catch (IOException e) {
-                System.err.println("Error copying directory: " + e.getMessage());
+                _print("Error copying directory: " + e.getMessage());
             }
             return (0);
         }
 
-        Path source = Paths.get(args[0]);
-        Path target = Paths.get(args[1]);
+        source = currentDirectory.resolve(args[0]);
+        target = currentDirectory.resolve(args[1]);
         try {
             Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (NoSuchFileException e) {
-            System.err.println("Error source file: " + e.getMessage());
+            _print("Error source file: " + e.getMessage());
         }
         return (0);
     }
@@ -192,7 +195,7 @@ public class Terminal {
         for (String element : args) {
             _print(element + " ", false);
         }
-        _print("", true);
+        _print("");
         return (0);
     }
 
@@ -457,7 +460,10 @@ public class Terminal {
     }
 
     /**
+     * Initializes the buffer to write into
      * 
+     * @author Adham Allam
+     * @return true if success, false otherwise.
      */
     public static boolean initBuffer() {
         if (Parser.write_mode == 0)
@@ -493,7 +499,11 @@ public class Terminal {
     /**
      * print a statement based of the write_mode
      * 
-     * @param s statememnt to be printed
+     * @author Adham Allam
+     * @param s       statememnt to be printed
+     * @param newLine takes two values:
+     *                true: pritn new line at the end
+     *                false don't print new line at the end
      */
     public static void _print(String s, boolean newLine) {
         /* Print to screen */
@@ -513,6 +523,10 @@ public class Terminal {
                 return;
             }
         }
+    }
+
+    public static void _print(String s) {
+        _print(s, true);
     }
 
     /**

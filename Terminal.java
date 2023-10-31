@@ -4,6 +4,7 @@ import java.nio.file.*;
 import java.util.Vector;
 import java.util.Arrays;
 import java.util.Collections;
+
 /**
  * Terminal - Executes some basic commands.
  *
@@ -18,13 +19,8 @@ public class Terminal {
     public static Parser parser = new Parser();
     static Path currentDirectory = Path.of(System.getProperty("user.dir"));
     public static Vector<String> CommandHistory = new Vector<>();
-
-    /**
-     * 0 - standard output
-     * 1 - file (write)
-     * 2 - file (append)
-     */
-    public static int write_mode = 0;
+    public static BufferedWriter buf = null;
+    public static File redirectFile = null;
     /**
      * 0 - success
      */
@@ -44,9 +40,8 @@ public class Terminal {
         } else if (s.equals("cd")) {
             last_status = cd(args);
         } else if (s.equals("ls")) {
-            last_status = ls();
-        }
-        else if (s.equals("mkdir")) {
+            last_status = ls(args);
+        } else if (s.equals("mkdir")) {
             last_status = mkdir(args);
         } else if (s.equals("rmdir")) {
             last_status = rmdir(args);
@@ -63,44 +58,27 @@ public class Terminal {
         } else if (s.equals("history")) {
             last_status = history();
         } else {
-            if(!s.equals("")){// check if a string is not equal to the "Enter" key
-                System.err.println(s +" is not recognized as a command");
-                last_status = 1; }// command not found
+            if (!s.equals("")) {// check if a string is not equal to the "Enter" key
+                System.err.println(s + " is not recognized as a command");
+                last_status = 1;
+            } // command not found
         }
 
     }
 
-
-    public static void check_mode() {
-        for (String s : parser.getArgs()) {
-            if (s.equals(">")) {
-                write_mode = 1;
-                break;
-            }
-            if (s.equals(">>")) {
-                write_mode = 2;
-                break;
-            }
-        }
-        write_mode = 0;
-    }
-    static public int ls(String[] args)
-    {
+    static public int ls(String[] args) {
         String currentDirectory = System.getProperty("user.dir");
-        File directory = new File( currentDirectory);
+        File directory = new File(currentDirectory);
 
         // Get a list of files and directories in the current directory
         String[] contents = directory.list();
 
-      
-        if(contents == null)
-        {
+        if (contents == null) {
             System.out.println("Not found files in this directory ");
             return 0;
-        }
-        else if(args.length == 0)   // Sort the contents alphabetically 
+        } else if (args.length == 0) // Sort the contents alphabetically
             Arrays.sort(contents);
-        else  // Sort the contents alphabetically in reverse order
+        else // Sort the contents alphabetically in reverse order
             Arrays.sort(contents, Collections.reverseOrder());
 
         // Print the sorted contents
@@ -109,6 +87,7 @@ public class Terminal {
         }
         return 0;
     }
+
     /**
      * Creates new and empty file
      *
@@ -124,9 +103,10 @@ public class Terminal {
             return (98);
         }
 
+        System.out.println(currentDirectory.toString());
         for (String fileName : args) {
             try {
-                File file = new File(fileName);
+                File file = new File(currentDirectory.toFile(), fileName);
 
                 if (file.createNewFile()) {
                     System.out.println("File created: " + file.getName());
@@ -154,7 +134,7 @@ public class Terminal {
      * @throws IOException
      */
     public static int cp(String[] args) throws IOException {
-        if (args.length > 3 || args.length < 2) {
+        if (args.length < 2) {
             System.out.println("Usage: cp file1 file2");
             return (98);
         }
@@ -210,8 +190,9 @@ public class Terminal {
      */
     public static int echo(String[] args) {
         for (String element : args) {
-            System.out.println(element);
+            _print(element + " ", false);
         }
+        _print("", true);
         return (0);
     }
 
@@ -222,7 +203,7 @@ public class Terminal {
      */
     public static int mkdir(String[] args) {
         for (String element : args) {
-            try{
+            try {
                 Path newdir = currentDirectory.resolve(element);
                 try {
                     Files.createDirectories(newdir);
@@ -233,13 +214,14 @@ public class Terminal {
                     System.err.println("Error creating directory: " + e.getMessage());
                     return (99);
                 }
-            }catch(InvalidPathException e){
+            } catch (InvalidPathException e) {
                 System.err.println("Invalid Path" + e.getMessage());
                 return (99);
             }
         }
         return (0);
     }
+
     /**
      * rmdir command
      * takes 1 argument which is “*” (e.g. rmdir *) and removes all the empty
@@ -250,7 +232,7 @@ public class Terminal {
      * it is empty.
      *
      */
-    public static int rmdir(String[] args){
+    public static int rmdir(String[] args) {
         if (args[0].equals("*")) {
             removeEmptyDirectories(currentDirectory.toFile());
         } else {
@@ -258,8 +240,7 @@ public class Terminal {
                 try {
                     Path dirToRemove = currentDirectory.resolve(element);
                     removeEmptyDirectories(dirToRemove.toFile());
-                }
-                catch(InvalidPathException e){
+                } catch (InvalidPathException e) {
                     System.err.println("Invalid Path" + e.getMessage());
                     return (99);
                 }
@@ -274,7 +255,7 @@ public class Terminal {
      * @param dir File object
      * @throws IOException if an error occurs while starting navigating through dirs
      */
-    private static int removeEmptyDirectories(File dir){
+    private static int removeEmptyDirectories(File dir) {
         File[] files = dir.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -284,7 +265,7 @@ public class Terminal {
             }
         }
         if (dir.listFiles() == null || dir.listFiles().length == 0) {
-            try{
+            try {
                 Files.delete(dir.toPath());
             } catch (IOException e) {
                 System.err.println("Error deleting directory: " + e.getMessage());
@@ -294,15 +275,15 @@ public class Terminal {
         }
         return 0;
     }
+
     /**
      * Prints the current directory to the console.
      *
      * @return Returns 0 upon successful execution.
      */
-    public static int  pwd()
-    {
-//        System.out.println( currentDirectory );
-//        return 0;
+    public static int pwd() {
+        // System.out.println( currentDirectory );
+        // return 0;
         Path currentDir = Paths.get(System.getProperty("user.dir"));
         System.out.println(currentDir);
         return 0;
@@ -343,8 +324,10 @@ public class Terminal {
             System.out.println(fileName + " does not exist in the current directory.");
         return 0;
     }
+
     /**
-     * Displays the content of one or more files or concatenates the content of two files.
+     * Displays the content of one or more files or concatenates the content of two
+     * files.
      *
      * @param args An array of one or two file names to display or concatenate.
      * @return Returns 0 upon successful execution, error otherwise.
@@ -374,7 +357,8 @@ public class Terminal {
      *
      * @param args An array containing a single file name.
      * @return Returns 0 on success, or a non-zero value to indicate an error.
-     * @throws IOException if an error occurs while reading the file or if the number of arguments is incorrect.
+     * @throws IOException if an error occurs while reading the file or if the
+     *                     number of arguments is incorrect.
      */
     public static int wc(String[] args) throws IOException {
         if (args.length != 1) {
@@ -400,11 +384,10 @@ public class Terminal {
 
         System.out.println(String.format("%d %d %d %s", lineCount, wordCount, charCount, fileName));
 
-
         return 0;
     }
 
-//
+    //
     /**
      * Changes the current directory.
      *
@@ -415,7 +398,8 @@ public class Terminal {
 
         Path currentDir = Paths.get(System.getProperty("user.dir"));
 
-        // Case 1: cd takes no arguments and changes the current path to the path of your home directory.
+        // Case 1: cd takes no arguments and changes the current path to the path of
+        // your home directory.
         if (args.length == 0) {
             String homeDir = System.getProperty("user.home");
             try {
@@ -428,7 +412,8 @@ public class Terminal {
             }
         }
 
-        // Case 2: cd takes 1 argument which is ". ." and changes the current directory to the previous directory.
+        // Case 2: cd takes 1 argument which is ". ." and changes the current directory
+        // to the previous directory.
         if (args.length == 1 && args[0].equals("..")) {
             try {
                 Path parentDir = currentDir.getParent();
@@ -446,7 +431,8 @@ public class Terminal {
             }
         }
 
-        // Case 3: cd takes 1 argument which is either the full path or the relative (short) path and changes the current path to that path.
+        // Case 3: cd takes 1 argument which is either the full path or the relative
+        // (short) path and changes the current path to that path.
         if (args.length == 1) {
             Path newDir = currentDir.resolve(args[0]);
             if (Files.exists(newDir) && Files.isDirectory(newDir)) {
@@ -470,6 +456,64 @@ public class Terminal {
         return 1;
     }
 
+    /**
+     * 
+     */
+    public static boolean initBuffer() {
+        if (Parser.write_mode == 0)
+            return false;
+
+        redirectFile = new File(currentDirectory.toFile(), Parser.RFname);
+        /* Write to file */
+        if (Parser.write_mode == 1) {
+            try {
+                buf = Files.newBufferedWriter(redirectFile.toPath(), StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+            } catch (IOException e) {
+                System.err.println("Error Creating file: " + e.getMessage());
+                return false;
+            }
+        }
+        /* Append to file */
+        if (Parser.write_mode == 2) {
+            if (!redirectFile.exists()) {
+                System.err.println("Error: File doesn't exist");
+                return false;
+            }
+            try {
+                buf = Files.newBufferedWriter(redirectFile.toPath(), StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                System.err.println("Error Creating file: " + e.getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * print a statement based of the write_mode
+     * 
+     * @param s statememnt to be printed
+     */
+    public static void _print(String s, boolean newLine) {
+        /* Print to screen */
+        if (Parser.write_mode == 0) {
+            System.out.print(s);
+            if (newLine)
+                System.out.println();
+            return;
+        }
+        if (buf != null) {
+            try {
+                buf.write(s);
+                if (newLine)
+                    buf.newLine();
+            } catch (IOException e) {
+                System.err.println("Error writing to file: " + e.getMessage());
+                return;
+            }
+        }
+    }
 
     /**
      * main - Entry point
@@ -482,8 +526,7 @@ public class Terminal {
     public static void main(String[] args) throws Exception {
         String cmd = "";
         try (Scanner input = new Scanner(System.in)) {
-            while (!cmd.equals("exit"))
-            {
+            while (true) {
                 System.out.print("> ");
                 cmd = input.nextLine();
                 if (cmd.equals("exit")) {
@@ -495,9 +538,12 @@ public class Terminal {
                     System.err.println("Error parsing command line.");
                     break;
                 }
-                check_mode();
+                if (!initBuffer())
+                    buf = null;
                 CommandHistory.add(parser.getCommandName());
                 chooseCommandAction();
+                if (buf != null)
+                    buf.close();
             }
         }
     }

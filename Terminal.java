@@ -45,8 +45,6 @@ public class Terminal {
             last_status = cd(args);
         } else if (s.equals("ls")) {
             last_status = ls();
-        }else if (s.equals("ls -r")) {
-            last_status = lsr();
         }
         else if (s.equals("mkdir")) {
             last_status = mkdir(args);
@@ -86,7 +84,7 @@ public class Terminal {
         }
         write_mode = 0;
     }
-    static public int ls()
+    static public int ls(String[] args)
     {
         String currentDirectory = System.getProperty("user.dir");
         File directory = new File( currentDirectory);
@@ -94,25 +92,16 @@ public class Terminal {
         // Get a list of files and directories in the current directory
         String[] contents = directory.list();
 
-        // Sort the contents alphabetically in reverse order
-        Arrays.sort(contents);
-
-        // Print the sorted contents
-        for (String item : contents) {
-            System.out.println(item);
+      
+        if(contents == null)
+        {
+            System.out.println("Not found files in this directory ");
+            return 0;
         }
-        return 0;
-    }
-    static public int lsr()
-    {
-        String currentDirectory = System.getProperty("user.dir");
-        File directory = new File( currentDirectory);
-
-        // Get a list of files and directories in the current directory
-        String[] contents = directory.list();
-
-        // Sort the contents alphabetically in reverse order
-        Arrays.sort(contents, Collections.reverseOrder());
+        else if(args.length == 0)   // Sort the contents alphabetically 
+            Arrays.sort(contents);
+        else  // Sort the contents alphabetically in reverse order
+            Arrays.sort(contents, Collections.reverseOrder());
 
         // Print the sorted contents
         for (String item : contents) {

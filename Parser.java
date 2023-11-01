@@ -26,8 +26,8 @@ class Parser {
     public boolean parse(String input) {
         write_mode = 0;
         cmd_line = input;
-        input = input.trim();
         String[] arr1 = null, arr = null;
+        input = input.trim();
 
         // Check if there is redirections
         if (input.contains(">>")) {
@@ -40,29 +40,24 @@ class Parser {
         }
 
         if (arr1.length > 2) {
-            System.err.println("Usage:command [> or >>] FileName");
+            System.err.println("Usage: command [> or >>] FileName");
             return false;
         }
 
         if (arr1.length > 0) {
-            arr = _split(arr1[0], " ");
+            arr = arr1[0].split(" (?=([^\"]*\"[^\"]*\")*[^\"]*$)");
             args = new String[arr.length - 1];
-            for (int i = 1; i < arr.length; i++)
-                if (!arr[i].isEmpty())
-                    args[i - 1] = arr[i];
+            for (int i = 1; i < arr.length; i++) {
+                if (!arr[i].isEmpty()) {
+                    args[i - 1] = arr[i].replace("\"", "");
+                }
+            }
             commandName = arr[0];
         }
 
         if (arr1.length > 1) {
-            arr = _split(arr1[1], " ");
-            for (int i = 0; i < arr.length; ++i) {
-                if (!arr[i].isEmpty()) {
-                    RFname = arr[i];
-                    break;
-                }
-            }
+            RFname = arr1[1].trim().replace("\"", "");
         }
-
         return true;
     }
 

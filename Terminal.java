@@ -73,9 +73,9 @@ public class Terminal {
         if (contents == null) {
             System.out.println("Not found files in this directory ");
             return 0;
-        } else if (args.length == 0)   // Sort the contents alphabetically
+        } else if (args.length == 0) // Sort the contents alphabetically
             Arrays.sort(contents);
-        else  // Sort the contents alphabetically in reverse order
+        else // Sort the contents alphabetically in reverse order
             Arrays.sort(contents, Collections.reverseOrder());
 
         // Print the sorted contents
@@ -90,7 +90,7 @@ public class Terminal {
      *
      * @param args files names
      * @return int indicates the exit status (
-     * 0 - success, error otherwise).
+     *         0 - success, error otherwise).
      * @throws IOException if an error occurs while creating the file.
      * @author Adham Allam
      */
@@ -100,10 +100,10 @@ public class Terminal {
             return (98);
         }
 
-        System.out.println(currentDirectory.toString());
         for (String fileName : args) {
             try {
-                File file = new File(currentDirectory.toFile(), fileName);
+                Path newdir = currentDirectory.resolve(fileName);
+                File file = newdir.toFile();
 
                 if (file.createNewFile()) {
                     _print("File created: " + file.getName());
@@ -126,7 +126,7 @@ public class Terminal {
      *
      * @param args argument list (files names)
      * @return int indicates the exit status (
-     * 0 - success, error otherwise).
+     *         0 - success, error otherwise).
      * @throws IOException
      * @author Adham Allam
      */
@@ -205,7 +205,7 @@ public class Terminal {
             try {
                 Path newdir = currentDirectory.resolve(element);
                 try {
-                    if(Files.exists(newdir)){
+                    if (Files.exists(newdir)) {
                         System.out.println("dir already exists: " + newdir);
                         return (99);
                     }

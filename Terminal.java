@@ -67,23 +67,20 @@ public class Terminal {
     }
 
     static public int ls(String[] args) {
-        String currentDirectory = System.getProperty("user.dir");
-        File directory = new File(currentDirectory);
-
+        Path directory = Paths.get(currentDirectory.toUri());
         // Get a list of files and directories in the current directory
-        String[] contents = directory.list();
-
+        File[] contents = directory.toFile().listFiles();
         if (contents == null) {
             System.out.println("Not found files in this directory ");
             return 0;
-        } else if (args.length == 0) // Sort the contents alphabetically
+        } else if (args.length == 0)   // Sort the contents alphabetically
             Arrays.sort(contents);
-        else // Sort the contents alphabetically in reverse order
+        else  // Sort the contents alphabetically in reverse order
             Arrays.sort(contents, Collections.reverseOrder());
 
         // Print the sorted contents
-        for (String item : contents) {
-            System.out.println(item);
+        for (File item : contents) {
+            System.out.println(item.getName());
         }
         return 0;
     }
@@ -92,10 +89,10 @@ public class Terminal {
      * Creates new and empty file
      *
      * @param args files names
-     * @author Adham Allam
      * @return int indicates the exit status (
-     *         0 - success, error otherwise).
+     * 0 - success, error otherwise).
      * @throws IOException if an error occurs while creating the file.
+     * @author Adham Allam
      */
     public static int touch(String[] args) {
         if (args.length == 0) {
@@ -127,11 +124,11 @@ public class Terminal {
      * not) and copies the first directory (with all its content) into the second
      * one.
      *
-     * @author Adham Allam
      * @param args argument list (files names)
      * @return int indicates the exit status (
-     *         0 - success, error otherwise).
+     * 0 - success, error otherwise).
      * @throws IOException
+     * @author Adham Allam
      */
     public static int cp(String[] args) throws IOException {
         if (args.length < 2) {
@@ -165,10 +162,10 @@ public class Terminal {
      * Takes 2 arguments, both are directories (empty or not) and copies the first
      * directory (with all its content) into the second one.
      *
-     * @author Adham Allam
      * @param source source directory
      * @param target target directory
      * @throws IOException
+     * @author Adham Allam
      */
     public static void copyDirectory(Path source, Path target) throws IOException {
         if (!Files.exists(target)) {
@@ -202,17 +199,18 @@ public class Terminal {
     /**
      * mkdir command
      * Takes 1 or more arguments and creates a directory for each argument
-     *
      */
     public static int mkdir(String[] args) {
         for (String element : args) {
             try {
                 Path newdir = currentDirectory.resolve(element);
                 try {
+                    if(Files.exists(newdir)){
+                        System.out.println("dir already exists: " + newdir);
+                        return (99);
+                    }
                     Files.createDirectories(newdir);
                     System.out.println("dir created: " + newdir);
-                } catch (FileAlreadyExistsException e) {
-                    System.out.println("dir already exists: " + newdir);
                 } catch (IOException e) {
                     System.err.println("Error creating directory: " + e.getMessage());
                     return (99);
@@ -233,7 +231,6 @@ public class Terminal {
      * takes 1 argument which is either the full path or the
      * relative (short) path and removes the given directory only if
      * it is empty.
-     *
      */
     public static int rmdir(String[] args) {
         if (args[0].equals("*")) {
@@ -285,10 +282,7 @@ public class Terminal {
      * @return Returns 0 upon successful execution.
      */
     public static int pwd() {
-        // System.out.println( currentDirectory );
-        // return 0;
-        Path currentDir = Paths.get(System.getProperty("user.dir"));
-        System.out.println(currentDir);
+        System.out.println(currentDirectory);
         return 0;
     }
 
@@ -391,6 +385,7 @@ public class Terminal {
     }
 
     //
+
     /**
      * Changes the current directory.
      *
@@ -399,15 +394,13 @@ public class Terminal {
      */
     public static int cd(String[] args) {
 
-        Path currentDir = Paths.get(System.getProperty("user.dir"));
-
         // Case 1: cd takes no arguments and changes the current path to the path of
         // your home directory.
         if (args.length == 0) {
-            String homeDir = System.getProperty("user.home");
+            Path homeDir = Path.of(System.getProperty("user.home"));
             try {
-                System.setProperty("user.dir", homeDir);
-                System.out.println(homeDir);
+                currentDirectory = currentDirectory.resolve(homeDir);
+                System.out.println(currentDirectory);
                 return 0;
             } catch (Exception e) {
                 System.err.println("Error changing directory: " + e.getMessage());
@@ -419,10 +412,10 @@ public class Terminal {
         // to the previous directory.
         if (args.length == 1 && args[0].equals("..")) {
             try {
-                Path parentDir = currentDir.getParent();
+                Path parentDir = currentDirectory.getParent();
                 if (parentDir != null) {
-                    System.setProperty("user.dir", parentDir.toString());
-                    System.out.println(parentDir);
+                    currentDirectory = currentDirectory.resolve(parentDir);
+                    System.out.println(currentDirectory);
                     return 0;
                 } else {
                     System.err.println("Already at the root directory.");
@@ -437,23 +430,16 @@ public class Terminal {
         // Case 3: cd takes 1 argument which is either the full path or the relative
         // (short) path and changes the current path to that path.
         if (args.length == 1) {
-            Path newDir = currentDir.resolve(args[0]);
-            if (Files.exists(newDir) && Files.isDirectory(newDir)) {
-                try {
-                    System.setProperty("user.dir", newDir.toString());
-                    System.out.println(newDir);
-                    return 0;
+            try {
+                currentDirectory = currentDirectory.resolve(args[0]);
+                System.out.println(currentDirectory);
+                return 0;
 
-                } catch (Exception e) {
-                    System.err.println("Error changing directory: " + e.getMessage());
-                    return 1;
-                }
-            } else {
-                System.err.println("Directory does not exist: " + args[0]);
+            } catch (InvalidPathException e) {
+                System.err.println("Error changing directory: " + e.getMessage());
                 return 1;
             }
         }
-
         // If none of the cases match, return an error.
         System.err.println("Invalid cd command. Usage: 'cd', 'cd ..', or 'cd <directory>'");
         return 1;
@@ -461,9 +447,9 @@ public class Terminal {
 
     /**
      * Initializes the buffer to write into
-     * 
-     * @author Adham Allam
+     *
      * @return true if success, false otherwise.
+     * @author Adham Allam
      */
     public static boolean initBuffer() {
         if (Parser.write_mode == 0)
@@ -498,12 +484,12 @@ public class Terminal {
 
     /**
      * print a statement based of the write_mode
-     * 
-     * @author Adham Allam
+     *
      * @param s       statememnt to be printed
      * @param newLine takes two values:
      *                true: pritn new line at the end
      *                false don't print new line at the end
+     * @author Adham Allam
      */
     public static void _print(String s, boolean newLine) {
         /* Print to screen */

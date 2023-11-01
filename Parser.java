@@ -58,11 +58,13 @@ class Parser {
         if (arr1.length > 1) {
             RFname = arr1[1].trim().replace("\"", "");
         }
+
         return true;
     }
 
+
     /**
-     * 
+     *
      */
     public static String[] _split(String s, String c) {
         String[] arr1 = s.split(c);

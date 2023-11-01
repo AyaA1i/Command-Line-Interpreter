@@ -419,6 +419,7 @@ public class Terminal {
                     return 0;
                 } else {
                     System.err.println("Already at the root directory.");
+
                     return 1;
                 }
             } catch (Exception e) {
@@ -430,16 +431,22 @@ public class Terminal {
         // Case 3: cd takes 1 argument which is either the full path or the relative
         // (short) path and changes the current path to that path.
         if (args.length == 1) {
-            try {
-                currentDirectory = currentDirectory.resolve(args[0]);
-                System.out.println(currentDirectory);
-                return 0;
-
-            } catch (InvalidPathException e) {
-                System.err.println("Error changing directory: " + e.getMessage());
+            Path newDir = currentDirectory.resolve(args[0]);
+            if (Files.exists(newDir) && Files.isDirectory(newDir)) {
+                try {
+                    currentDirectory = newDir;
+                    System.out.println(currentDirectory);
+                    return 0;
+                } catch (Exception e) {
+                    System.err.println("Error changing directory: " + e.getMessage());
+                    return 1;
+                }
+            } else {
+                System.err.println("The specified directory does not exist or is not a directory.");
                 return 1;
             }
         }
+
         // If none of the cases match, return an error.
         System.err.println("Invalid cd command. Usage: 'cd', 'cd ..', or 'cd <directory>'");
         return 1;
